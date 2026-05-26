@@ -96,7 +96,7 @@ export function TodoList() {
                     </div>
                   </div>
 
-                  {/* COLUMN BODY */}
+                  {/* COLUMN BODY --*/}
                   <Droppable droppableId={column.id}>
                     {(provided, snapshot) => (
                       <div
