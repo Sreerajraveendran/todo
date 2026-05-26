@@ -11,7 +11,7 @@ describe('TodoList Component', () => {
     render(<TodoList />);
 
     expect(
-      screen.getByText('Todo Workspace new')
+      screen.getByText('Todo Workspace')
     ).toBeInTheDocument();
 
     expect(

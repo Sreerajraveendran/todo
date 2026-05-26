@@ -47,7 +47,7 @@ export function TodoList() {
         {/* HEADER */}
         <header className="mb-10 text-center">
           <h1 className="text-5xl font-black text-slate-900 tracking-tight">
-            Todo Workspace new
+            Todo Workspace
           </h1>
 
           <p className="text-slate-500 mt-3 text-lg">

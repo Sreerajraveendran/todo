@@ -10,7 +10,8 @@ on:
       - main
 
 jobs:
-  build-and-test:
+
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,13 +29,32 @@ jobs:
       - name: Run tests
         run: npm run test -- --run
 
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Build project
         run: npm run build
 
-  deploy:
-    needs: build-and-test
 
-    if: github.ref == 'refs/heads/main'
+  deploy:
+    needs: build
+
+    # Deploy only on push to main
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     runs-on: ubuntu-latest
 
