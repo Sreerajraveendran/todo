@@ -1,6 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { DropResult } from '@hello-pangea/dnd';import { useTodos } from './useTodos';
+import type { DropResult } from '@hello-pangea/dnd';
+import { useTodos } from './useTodos';
 
 describe('useTodos Kanban Hook', () => {
   beforeEach(() => {
@@ -76,6 +77,32 @@ describe('useTodos Kanban Hook', () => {
     expect(result.current.board.todo).toHaveLength(0);
     expect(result.current.board.inProgress).toHaveLength(1);
     expect(result.current.board.inProgress[0].title).toBe('Move me');
+  });
+  it('should edit a todo title and priority', () => {
+  const { result } = renderHook(() => useTodos());
+
+  act(() => {
+    result.current.addTodo('Old Task', 'low');
+  });
+
+  const taskId = result.current.board.todo[0].id;
+
+  act(() => {
+    result.current.editTodo(
+      'todo',
+      taskId,
+      'Updated Task',
+      'high'
+    );
+  });
+
+  expect(
+    result.current.board.todo[0].title
+  ).toBe('Updated Task');
+
+  expect(
+    result.current.board.todo[0].priority
+  ).toBe('high');
   });
 
   it('should reorder tasks within the same column', () => {

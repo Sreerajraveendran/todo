@@ -107,10 +107,14 @@ export function TodoItem({ todo, index, columnId, onDelete, onEdit }: TodoItemPr
                 <span className={clsx("px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider mr-1", priorityColors[todo.priority])}>
                   <Flag size={10} className="inline mr-1" />{todo.priority}
                 </span>
-                <button onClick={() => setIsEditing(true)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-                  <Pencil size={16} />
+                <button
+                  aria-label="edit-task"
+                  onClick={() => setIsEditing(true)}
+                  className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                > 
+                <Pencil size={16} />
                 </button>
-                <button onClick={onDelete} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
+                <button onClick={onDelete} aria-label="delete-task" className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
                   <Trash2 size={16} />
                 </button>
               </div>

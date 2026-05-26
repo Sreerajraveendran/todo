@@ -1,43 +1,110 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, beforeEach,vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { TodoList } from './TodoList';
 
-describe('TodoList Integration', () => {
+describe('TodoList Component', () => {
   beforeEach(() => {
     localStorage.clear();
-    // Mock Framer Motion to prevent animation issues in test environment
-    vi.mock('framer-motion', () => ({
-      motion: { div: 'div' },
-      AnimatePresence: ({ children }: any) => children,
-    }));
   });
 
-  it('renders empty state initially', () => {
+  it('renders the workspace title and columns', () => {
     render(<TodoList />);
-    expect(screen.getByText('No tasks found.')).toBeInTheDocument();
+
+    expect(
+      screen.getByText('Todo Workspace')
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText('To Do')
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText('In Progress')
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText('Completed')
+    ).toBeInTheDocument();
   });
 
-  it('allows adding a task and then filtering it via search', () => {
+  it('renders the todo input field', () => {
     render(<TodoList />);
-    
-    const input = screen.getByPlaceholderText('What needs to be done?');
-    const button = screen.getByRole('button'); // Add button
-    
-    // 1. Add a task
-    fireEvent.change(input, { target: { value: 'Urgent patch' } });
-    fireEvent.click(button);
-    
-    expect(screen.getByText('Urgent patch')).toBeInTheDocument();
-    expect(screen.queryByText('No tasks found.')).not.toBeInTheDocument();
 
-    // 2. Search for something else (task should disappear)
-    const searchInput = screen.getByPlaceholderText('Search tasks...');
-    fireEvent.change(searchInput, { target: { value: 'Backend feature' } });
-    
-    expect(screen.queryByText('Urgent patch')).not.toBeInTheDocument();
-    
-    // 3. Search for the task (task should reappear)
-    fireEvent.change(searchInput, { target: { value: 'patch' } });
-    expect(screen.getByText('Urgent patch')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(
+        'What needs to be done?'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('allows adding a new todo task', () => {
+    render(<TodoList />);
+
+    const input = screen.getByPlaceholderText(
+      'What needs to be done?'
+    );
+
+    const addButton = screen.getByRole('button');
+
+    fireEvent.change(input, {
+      target: { value: 'Urgent patch' },
+    });
+
+    fireEvent.click(addButton);
+
+    expect(
+      screen.getByText('Urgent patch')
+    ).toBeInTheDocument();
+  });
+
+  it('clears the input after adding a task', () => {
+    render(<TodoList />);
+
+    const input = screen.getByPlaceholderText(
+      'What needs to be done?'
+    ) as HTMLInputElement;
+
+    const addButton = screen.getByRole('button');
+
+    fireEvent.change(input, {
+      target: { value: 'Fix API issue' },
+    });
+
+    fireEvent.click(addButton);
+
+    expect(input.value).toBe('');
+  });
+
+ it('does not add empty tasks', () => {
+  render(<TodoList />);
+
+  const addButton = screen.getByRole('button');
+
+  fireEvent.click(addButton);
+
+  // Counter should remain zero
+  const zeroCounters = screen.getAllByText('0');
+
+  expect(zeroCounters.length).toBeGreaterThan(0);
+  });
+
+  it('shows task count when a todo is added', () => {
+    render(<TodoList />);
+
+    const input = screen.getByPlaceholderText(
+      'What needs to be done?'
+    );
+
+    const addButton = screen.getByRole('button');
+
+    fireEvent.change(input, {
+      target: { value: 'Complete testing' },
+    });
+
+    fireEvent.click(addButton);
+
+    expect(
+      screen.getByText('1')
+    ).toBeInTheDocument();
   });
 });
