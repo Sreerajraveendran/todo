@@ -10,29 +10,36 @@ on:
       - main
 
 jobs:
-
   test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Setup Environment
-        uses: ./.github/actions/setup-env
+      # 1. MUST do this first so the runner has your files
+      - name: Checkout code
+        uses: actions/checkout@v5
 
+      # 2. Now the runner can see this folder!
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env 
+
+      # 3. Run tests
       - name: Run tests
         run: npm run test -- --run
-
 
   build:
     needs: test
     runs-on: ubuntu-latest
-
     steps:
+      # 1. MUST do this first in the new job too
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      # 2. Call the reusable action
       - name: Setup Environment
-        uses: ./.github/actions/setup-env
-        
+        uses: ./.github/actions/setup-env 
+
+      # 3. Run build
       - name: Build project
         run: npm run build
-
 
   deploy:
     needs: build
