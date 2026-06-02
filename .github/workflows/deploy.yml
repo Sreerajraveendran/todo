@@ -65,6 +65,7 @@ jobs:
           client-id: ${{ env.ACTION_APP_ID }}
           private-key: ${{ env.ACTION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
           
       - name: Deploy to GitHub Pages
         run: |
