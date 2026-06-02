@@ -45,6 +45,11 @@ jobs:
     permissions:
       contents: write 
 
+    # FORCE INJECTION: This ensures the runner specifically grabs these
+    env:
+      ACTION_APP_ID: ${{ vars.ACTION_APP_ID }}
+      ACTION_APP_PRIVATE_KEY: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -56,18 +61,14 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3.2.0
         with:
-          client-id: ${{ vars.ACTION_APP_ID }}
-          private-key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
+          # Now reference the values injected via the 'env' block
+          client-id: ${{ env.ACTION_APP_ID }}
+          private-key: ${{ env.ACTION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-
+          
       - name: Deploy to GitHub Pages
-        # Industry standard: Reference the token directly from the step output
-        # to ensure it is never inadvertently exposed via global env vars.
         run: |
           git config --global user.name "sreeraj-cicd-bot[bot]"
           git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
-          
-          # Use the token directly from the 'app-token' step's output
           git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
-          
           npm run deploy
