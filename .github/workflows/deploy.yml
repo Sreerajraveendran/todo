@@ -4,24 +4,26 @@ on:
   push:
     branches:
       - main
-
+      - dev
+      - qa
+      - uat
   pull_request:
     branches:
       - main
+      - dev
+      - qa
+      - uat
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      # 1. MUST do this first so the runner has your files
       - name: Checkout code
         uses: actions/checkout@v5
 
-      # 2. Now the runner can see this folder!
       - name: Setup Environment
         uses: ./.github/actions/setup-env 
 
-      # 3. Run tests
       - name: Run tests
         run: npm run test -- --run
 
@@ -29,26 +31,22 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      # 1. MUST do this first in the new job too
       - name: Checkout code
         uses: actions/checkout@v5
 
-      # 2. Call the reusable action
       - name: Setup Environment
         uses: ./.github/actions/setup-env 
 
-      # 3. Run build
-      - name: Build project
-        run: npm run build
+      # CHANGED STEP: Dynamically pass the current branch name to Vite/React build
+      - name: Build project for specific environment
+        run: |
+          echo "Building the project specifically for the ${{ github.ref_name }} branch"
+          npm run build -- --mode ${{ github.ref_name }}
 
   deploy:
     needs: build
-
-    # Deploy only on push to main
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -56,14 +54,11 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup-env 
 
-
       - name: Deploy to GitHub Pages
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
-
           npm run deploy
