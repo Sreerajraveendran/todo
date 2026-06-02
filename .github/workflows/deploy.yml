@@ -6,7 +6,7 @@ on:
       - main
       - dev
       - qa
-      - uat--
+      - uat
 
 
 jobs:
