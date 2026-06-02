@@ -43,7 +43,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required to allow the App to push to your gh-pages branch
+      contents: write 
 
     steps:
       - name: Checkout code
@@ -52,23 +52,22 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup-env 
 
-      # NEW: This step generates your VIP Token on the fly!
       - name: Generate GitHub App Token
         id: app-token
         uses: actions/create-github-app-token@v3.2.0
         with:
-          app-id: ${{ vars.ACTION_APP_ID }}
+          client-id: ${{ vars.ACTION_APP_ID }}
           private-key: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
       - name: Deploy to GitHub Pages
-        env:
-          # Use the VIP token generated in the step above
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        # Industry standard: Reference the token directly from the step output
+        # to ensure it is never inadvertently exposed via global env vars.
         run: |
           git config --global user.name "sreeraj-cicd-bot[bot]"
           git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
           
-          # This uses your VIP token to authenticate the push
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          # Use the token directly from the 'app-token' step's output
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
+          
           npm run deploy
