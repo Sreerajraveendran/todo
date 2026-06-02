@@ -31,7 +31,7 @@ export function TodoItem({ todo, index, columnId, onDelete, onEdit }: TodoItemPr
   };
 
   const priorityColors = {
-    low: 'text-blue-600 bg-blue-100/80',
+    low: 'text-blue-600 bg-yellow-100/80',
     medium: 'text-amber-600 bg-amber-100/80',
     high: 'text-rose-600 bg-rose-100/80'
   };
