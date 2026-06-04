@@ -8,7 +8,6 @@ on:
       - qa
       - uat
 
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -32,20 +31,19 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup-env 
 
-      # CHANGED STEP: Dynamically pass the current branch name to Vite/React build
-      - name: Build project for specific environment
+      - name: Build project
         run: |
-          echo "Building the project specifically for the ${{ github.ref_name }} branch"
+          echo "Building for branch: ${{ github.ref_name }}"
           npm run build -- --mode ${{ github.ref_name }}
 
   deploy:
     needs: build
+    # Deploy only from main branch
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write 
 
-    # FORCE INJECTION: This ensures the runner specifically grabs these
     env:
       ACTION_APP_ID: ${{ vars.ACTION_APP_ID }}
       ACTION_APP_PRIVATE_KEY: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
@@ -61,16 +59,16 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v3.2.0
         with:
-          # Now reference the values injected via the 'env' block
           client-id: ${{ env.ACTION_APP_ID }}
           private-key: ${{ env.ACTION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
           
       - name: Deploy to GitHub Pages
-        # git config --global user.name "sreeraj-cicd-bot[bot]"
-        # git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
-        # git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
-        
+        env:
+          # gh-pages automatically uses GITHUB_TOKEN for auth
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-            npm run deploy
+          git config --global user.name "sreeraj-cicd-bot[bot]"
+          git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
+          npm run deploy
