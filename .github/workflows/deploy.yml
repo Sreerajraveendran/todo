@@ -38,7 +38,6 @@ jobs:
 
   deploy:
     needs: build
-    # Deploy only from main branch
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -49,12 +48,7 @@ jobs:
       ACTION_APP_PRIVATE_KEY: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup-env 
-
+      # STEP 1: Generate the token FIRST
       - name: Generate GitHub App Token
         id: app-token
         uses: actions/create-github-app-token@v3.2.0
@@ -63,12 +57,23 @@ jobs:
           private-key: ${{ env.ACTION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
+
+      # STEP 2: Checkout the code USING the generated token
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          # This tells checkout to configure Git using your secure App Token
+          token: ${{ steps.app-token.outputs.token }}
+
+      # STEP 3: Setup your environment
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env 
           
+      # STEP 4: Deploy
       - name: Deploy to GitHub Pages
-        env:
-          # gh-pages automatically uses GITHUB_TOKEN for auth
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           git config --global user.name "sreeraj-cicd-bot[bot]"
           git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
+          # No environment variables or messy URL overrides needed here anymore!
+          # Git is already fully authenticated from Step 2.
           npm run deploy
