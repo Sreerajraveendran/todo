@@ -8,6 +8,7 @@ on:
       - qa
       - uat
 
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -31,9 +32,10 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup-env 
 
-      - name: Build project
+      # CHANGED STEP: Dynamically pass the current branch name to Vite/React build
+      - name: Build project for specific environment
         run: |
-          echo "Building for branch: ${{ github.ref_name }}"
+          echo "Building the project specifically for the ${{ github.ref_name }} branch"
           npm run build -- --mode ${{ github.ref_name }}
 
   deploy:
@@ -43,37 +45,31 @@ jobs:
     permissions:
       contents: write 
 
+    # FORCE INJECTION: This ensures the runner specifically grabs these
     env:
       ACTION_APP_ID: ${{ vars.ACTION_APP_ID }}
       ACTION_APP_PRIVATE_KEY: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
 
     steps:
-      # STEP 1: Generate the token FIRST
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env 
+
       - name: Generate GitHub App Token
         id: app-token
         uses: actions/create-github-app-token@v3.2.0
         with:
+          # Now reference the values injected via the 'env' block
           client-id: ${{ env.ACTION_APP_ID }}
           private-key: ${{ env.ACTION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
-
-      # STEP 2: Checkout the code USING the generated token
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          # This tells checkout to configure Git using your secure App Token
-          token: ${{ steps.app-token.outputs.token }}
-
-      # STEP 3: Setup your environment
-      - name: Setup Environment
-        uses: ./.github/actions/setup-env 
           
-      # STEP 4: Deploy
       - name: Deploy to GitHub Pages
         run: |
           git config --global user.name "sreeraj-cicd-bot[bot]"
           git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
-          # No environment variables or messy URL overrides needed here anymore!
-          # Git is already fully authenticated from Step 2.
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
           npm run deploy
