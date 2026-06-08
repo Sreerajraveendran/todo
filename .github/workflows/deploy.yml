@@ -54,6 +54,11 @@ jobs:
       - name: Build project for specific environment
         run: |
           npm run build -- --mode $BUILD_ENV
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-build
+          path: dist
 
   deploy:
     needs: build
@@ -87,6 +92,11 @@ jobs:
           private-key: ${{ env.ACTION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: react-build
+          path: dist
           
       - name: Deploy to GitHub Pages
         env:
