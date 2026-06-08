@@ -8,10 +8,18 @@ on:
       - qa
       - uat
 
+concurrency:
+  group: react-cicd-${{ github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest,windows-latest,macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -24,7 +32,8 @@ jobs:
 
   build:
     needs: test
-    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    runs-on:  ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -32,16 +41,27 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/setup-env 
 
+      - name: Set Build Environment
+        shell: bash
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "BUILD_ENV=production" >> $GITHUB_ENV
+          else
+            echo "BUILD_ENV=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
       # CHANGED STEP: Dynamically pass the current branch name to Vite/React build
       - name: Build project for specific environment
         run: |
-          echo "Building the project specifically for the ${{ github.ref_name }} branch"
-          npm run build -- --mode ${{ github.ref_name }}
+          npm run build -- --mode $BUILD_ENV
 
   deploy:
     needs: build
+    timeout-minutes: 10
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment:
+      name: production
     permissions:
       contents: write 
 
@@ -49,6 +69,7 @@ jobs:
     env:
       ACTION_APP_ID: ${{ vars.ACTION_APP_ID }}
       ACTION_APP_PRIVATE_KEY: ${{ secrets.ACTION_APP_PRIVATE_KEY }}
+      DEPLOY_ENV: production
 
     steps:
       - name: Checkout code
