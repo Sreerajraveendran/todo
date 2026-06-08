@@ -89,8 +89,7 @@ jobs:
           repositories: ${{ github.event.repository.name }}
           
       - name: Deploy to GitHub Pages
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          git config --global user.name "sreeraj-cicd-bot[bot]"
-          git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git
-          npm run deploy
+         npm run deploy
