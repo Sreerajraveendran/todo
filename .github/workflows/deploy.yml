@@ -59,6 +59,7 @@ jobs:
         with:
           name: react-build
           path: dist
+          retention-days: 1
 
   deploy:
     needs: build
@@ -102,4 +103,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-         npm run deploy
+          git config --global user.name "sreeraj-cicd-bot[bot]"
+          git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
+          
+          git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
+          npm run deploy
+      - name: Notify Microsoft Teams
+        uses: skitionek/notify-microsoft-teams@v1.0.8
+        if: always()
+        with: 
+          webhook_url: ${{ secrets.TEAMS_WEBHOOK }}
+        needs: ${{ toJson(needs) }} 
+        job: ${{ toJson(job) }} 
+        steps: ${{ toJson(steps) }} 
+          
+        dry_run: false 
+          
+        title: "${{ github.actor }} deployed the React app to the ${{ github.ref_name }} environment"
