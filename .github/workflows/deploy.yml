@@ -113,10 +113,8 @@ jobs:
         if: always()
         with: 
           webhook_url: ${{ secrets.TEAMS_WEBHOOK }}
-        needs: ${{ toJson(needs) }} 
-        job: ${{ toJson(job) }} 
-        steps: ${{ toJson(steps) }} 
-          
-        dry_run: false 
-          
-        title: "${{ github.actor }} deployed the React app to the ${{ github.ref_name }} environment"
+          needs: ${{ toJson(needs) }} 
+          job: ${{ toJson(job) }} 
+          steps: ${{ toJson(steps) }} 
+          dry_run: false 
+          title: "${{ github.actor }} deployed the React app to the ${{ github.ref_name }} environment"
