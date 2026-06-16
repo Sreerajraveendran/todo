@@ -109,10 +109,10 @@ jobs:
           git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
           npm run deploy
       - name: Notify Microsoft Teams
-        uses: skitionek/notify-microsoft-teams@v1.0.8
-        if: always()
-        with: 
-          webhook_url: ${{ secrets.TEAMS_WEBHOOK }}
+        uses: skitionek/notify-microsoft-teams@v1.0.8 
+        if: always() 
+        with:
+          webhook_url: ${{ secrets.TEAMS_WEBHOOK }} 
           needs: ${{ toJson(needs) }} 
           job: ${{ toJson(job) }} 
           steps: ${{ toJson(steps) }} 
