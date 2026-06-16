@@ -108,13 +108,11 @@ jobs:
           
           git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
           npm run deploy
-      - name: Notify Microsoft Teams
-        uses: skitionek/notify-microsoft-teams@v1.0.8 
-        if: always() 
-        with:
-          webhook_url: ${{ secrets.TEAMS_WEBHOOK }} 
-          needs: ${{ toJson(needs) }} 
-          job: ${{ toJson(job) }} 
-          steps: ${{ toJson(steps) }} 
-          dry_run: false 
-          title: "${{ github.actor }} deployed the React app to the ${{ github.ref_name }} environment"
+      - name: Notify Teams
+        if: always()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+            "text":"✅ React CI/CD deployment completed successfully on '${{ github.ref_name }}'"
+            }' \
+            "${{ secrets.TEAMS_WEBHOOK }}"
