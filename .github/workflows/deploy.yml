@@ -108,11 +108,11 @@ jobs:
           
           git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
           npm run deploy
-      - name: Notify Teams
+      - name: Send Microsoft Teams Notification
         if: always()
-        run: |
-          curl -H "Content-Type: application/json" \
-            -d '{
-            "text":"✅ React CI/CD deployment completed successfully on '${{ github.ref_name }}'"
-            }' \
-            "${{ secrets.TEAMS_WEBHOOK }}"
+        uses: skandash/action-teams-webhook@v1.2
+        with:
+          webhook_url: ${{ secrets.TEAMS_WEBHOOK }}
+          status: ${{ job.status }}
+          title: "CI/CD Pipeline: ${{ job.status }}"
+          text: "The automated pipeline run for the **${{ github.ref_name }}** branch has completed. View the logs on GitHub."
