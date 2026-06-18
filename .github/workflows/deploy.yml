@@ -45,9 +45,9 @@ jobs:
         shell: bash
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "BUILD_ENV=production" >> $GITHUB_ENV
+            echo "BUILD_ENV=github" >> $GITHUB_ENV
           else
-            echo "BUILD_ENV=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "BUILD_ENV=docker" >> $GITHUB_ENV
           fi
 
       # CHANGED STEP: Dynamically pass the current branch name to Vite/React build
@@ -110,11 +110,11 @@ jobs:
           npm run deploy
       - name: Notify Microsoft Teams
         uses: skitionek/notify-microsoft-teams@v1.0.8 
-        if: always() 
+        if: always()
+        continue-on-error: true 
         with:
           webhook_url: ${{ secrets.TEAMS_WEBHOOK }} 
           needs: ${{ toJson(needs) }} 
           job: ${{ toJson(job) }} 
           steps: ${{ toJson(steps) }} 
-          dry_run: false 
-          title: "${{ github.actor }} deployed the React app to the ${{ github.ref_name }} environment"
+          dry_run: false
