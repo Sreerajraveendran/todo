@@ -89,7 +89,7 @@ jobs:
         uses: actions/create-github-app-token@v3.2.0
         with:
           # Now reference the values injected via the 'env' block
-          client-id: ${{ env.ACTION_APP_ID }}
+          app-id: ${{ env.ACTION_APP_ID }}
           private-key: ${{ env.ACTION_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
