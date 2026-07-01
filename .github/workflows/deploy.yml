@@ -99,22 +99,22 @@ jobs:
           name: react-build
           path: dist
           
-      - name: Deploy to GitHub Pages
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          git config --global user.name "sreeraj-cicd-bot[bot]"
-          git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
+      # - name: Deploy to GitHub Pages
+      #   env:
+      #     GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      #   run: |
+      #     git config --global user.name "sreeraj-cicd-bot[bot]"
+      #     git config --global user.email "sreeraj-cicd-bot[bot]@users.noreply.github.com"
           
-          git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
-          npm run deploy
-      - name: Notify Microsoft Teams
-        uses: skitionek/notify-microsoft-teams@v1.0.8 
-        if: always()
-        continue-on-error: true 
-        with:
-          webhook_url: ${{ secrets.TEAMS_WEBHOOK }} 
-          needs: ${{ toJson(needs) }} 
-          job: ${{ toJson(job) }} 
-          steps: ${{ toJson(steps) }} 
-          dry_run: false
+      #     git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/${GITHUB_REPOSITORY}.git
+      #     npm run deploy
+      # - name: Notify Microsoft Teams
+      #   uses: skitionek/notify-microsoft-teams@v1.0.8 
+      #   if: always()
+      #   continue-on-error: true 
+      #   with:
+      #     webhook_url: ${{ secrets.TEAMS_WEBHOOK }} 
+      #     needs: ${{ toJson(needs) }} 
+      #     job: ${{ toJson(job) }} 
+      #     steps: ${{ toJson(steps) }} 
+      #     dry_run: false
